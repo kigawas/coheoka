@@ -1,4 +1,4 @@
-Coheoka
+coheoka
 =====
 Coherence evaluation using CoreNLP's Python wrapper.
 
@@ -19,5 +19,5 @@ You can also find an online demo maintained by Stanford at [here](http://corenlp
 
 ## Trivia
 
-### What is the meaning of Coheoka?
+### What is the meaning of coheoka?
 Coherence + Hyouka (means "evaluation" in Japanese).
