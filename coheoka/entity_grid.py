@@ -186,7 +186,7 @@ T = 'I like apple juice. He also likes it.'
 
 if __name__ == '__main__':
     doctest.testmod()
-    eg_test = EntityGrid(T)
-    pprint(eg_test.grid)
-    eg_test.resolve_coreference()
-    pprint(eg_test.grid)
+    EG = EntityGrid(T)
+    pprint(EG.grid)
+    EG.resolve_coreference()
+    pprint(EG.grid)
