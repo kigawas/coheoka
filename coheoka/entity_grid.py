@@ -210,12 +210,12 @@ class EntityTransition(object):
     def all_prob(self):
         '''Calculate a feature vector using all transitions'''
         tran_len = len(self.transition_table.iat[0, 0])
-        from itertools import permutations
+        from itertools import product
         seq = [Constants.SUB, Constants.OBJ, Constants.OTHER, Constants.NOSHOW]
         d = {}
-        for tran in permutations(seq, tran_len):
-            pprint(tran)
-            d[tran] = self.prob(tran)
+        for pro in product(seq, repeat = tran_len):
+#            pprint(pro)
+            d[pro] = self.prob(pro)
         return d
 
     def prob(self, tran):
@@ -251,20 +251,20 @@ if __name__ == '__main__':
     doctest.testmod()
     S, O, X, N = Constants.SUB, Constants.OBJ, Constants.OTHER, Constants.NOSHOW
 
-    #    T = '''
-    #        The Justice Department is conducting an anti-trust trial against Microsoft Corp with evidence that the company is increasingly attempting to crush competitors.
-    #        Microsoft is accused of trying to forcefully buy into markets where its own products are not competitive enough to unseat established brands.
-    #        The case revolves around evidence of Microsoft aggressively pressuring Netscape into merging browser software.
-    #        Microsoft claims its tactics are commonplace and good economically.
-    #        The government may file a civil suit ruling that conspiracy to curb competition through collusion is a violation of the Sherman Act.
-    #        Microsoft continues to show increased earnings despite the trial.
-    #        '''
+    T = '''
+            The Justice Department is conducting an anti-trust trial against Microsoft Corp with evidence that the company is increasingly attempting to crush competitors.
+            Microsoft is accused of trying to forcefully buy into markets where its own products are not competitive enough to unseat established brands.
+            The case revolves around evidence of Microsoft aggressively pressuring Netscape into merging browser software.
+            Microsoft claims its tactics are commonplace and good economically.
+            The government may file a civil suit ruling that conspiracy to curb competition through collusion is a violation of the Sherman Act.
+            Microsoft continues to show increased earnings despite the trial.
+            '''
 
     #    T = 'My friend is Bob. He loves playing basketball.'
 
-    #    T = 'I like apple juice. He also likes it.'
+#    T = 'I like apple juice. He also likes it.'
 
-    T = 'I have a friend called Bob. He loves playing basketball. I also love playing basketball.'
+#    T = 'I have a friend called Bob. He loves playing basketball. I also love playing basketball.'
 
     #    T = 'The Justice Department is conducting an anti-trust trial against\
     #         Microsoft Corp with evidence that the company is increasingly attempting to crush competitors.'
