@@ -3,26 +3,54 @@
 Build entity grid using StanfordCoreNLP
 '''
 from __future__ import print_function, division
-
+from itertools import product
 from collections import defaultdict
-import doctest
+import doctest, json
 from pprint import pprint
-from pycorenlp import StanfordCoreNLP
 import pandas as pd
+import requests
+
+
+class StanfordCoreNLP(object):
+    def __init__(self, server_url):
+        if server_url[-1] == '/':
+            server_url = server_url[:-1]
+        self.server_url = server_url
+
+    def annotate(self, text, properties=None):
+        if not properties:
+            properties = {}
+        r = requests.post(self.server_url,
+                          params={
+                              'properties': str(properties)
+                          },
+                          data=text)
+        output = r.text
+        if ('outputFormat' in properties and
+                properties['outputFormat'] == 'json'):
+            try:
+                output = json.loads(output, strict=False)
+            except:
+                pass
+        return output
 
 
 class CoreNLP(object):
     '''Connect CoreNLP server'''
     _NLP = StanfordCoreNLP('http://localhost:9000')
     _PROP = {'annotators':
-             'tokenize, ssplit, pos, lemma, ner, depparse, openie, dcoref',
-             'outputFormat': 'json',
-             'openie.resolve_coref': 'true'}
+             'tokenize, ssplit, pos, lemma, ner, depparse, openie, coref',
+             "coref.md.type": "dep",
+             "coref.mode": "statistical",
+             'outputFormat': 'json'}
 
     @staticmethod
     def annotate(text):
         '''Get result from CoreNLP via JSON'''
-        return CoreNLP.nlp().annotate(text, properties=CoreNLP._PROP)
+        try:
+            return CoreNLP.nlp().annotate(text, properties=CoreNLP._PROP)
+        except UnicodeError:
+            pprint(text)
 
     @staticmethod
     def nlp():
@@ -59,10 +87,10 @@ class EntityGrid(object):
     '''
     Entity grid
     >>> eg = EntityGrid('My friend is Bob. He loves playing basketball.')
-    >>> eg.grid.columns
-    Index([u'Bob', u'basketball', u'friend', u'he'], dtype='object')
-    >>> eg.resolve_coreference().grid.columns
-    Index([u'Bob', u'basketball'], dtype='object')
+    >>> 'friend' in eg.grid.columns and 'he' in eg.grid.columns
+    True
+    >>> 'he' not in eg.resolve_coreference().grid.columns
+    True
     '''
 
     def __init__(self, text):
@@ -115,6 +143,12 @@ class EntityGrid(object):
 
         for i, (dep, ety) in enumerate(zip(depens, entities)):
             nouns = [e['word'] for e in ety]
+            try:
+                [d['dependentGloss'] for d in dep]
+            except KeyError:
+                pprint(dep)
+                pprint(i)
+                pprint(self.text)
             nouns_dp = [
                 d
                 for d in dep
@@ -138,7 +172,9 @@ class EntityGrid(object):
 
     def _add_column(self, _c1, _c2):
         '''Add grid[c2] to grid[c1]'''
+
         assert len(self.grid[_c1]) == len(self.grid[_c2])
+
         assert _c1 != _c2
         col1, col2 = self.grid[_c1], self.grid[_c2]
         for i, _col1 in enumerate(col1):
@@ -159,17 +195,16 @@ class EntityGrid(object):
                       for chains in self._data['corefs'].values()
                       if len(chains) > 1]:
             core_entity, other_entities = None, []
-            #pprint(chain)
             for cor in chain:
                 word = self._map_phrase_to_entity(cor['text'])
-                if word is not None and cor[is_rep]:
-                    core_entity = word
-                elif word is not None and word != core_entity:
-                    other_entities.append(word)
-                else:
-                    pass
+                if word is not None and word not in other_entities:
+                    if cor[is_rep]:
+                        core_entity = word
+                    elif word != core_entity:
+                        other_entities.append(word)
+                    else:
+                        pass
 
-                    #print(core_entity, other_entities)
             if core_entity is not None and other_entities != []:
                 self._add_columns(core_entity, *other_entities)
         return self
@@ -180,17 +215,19 @@ class EntityTransition(object):
     Local entity transition
     >>> eg = EntityGrid('I like apple juice. He also likes it.')
     >>> et = EntityTransition(eg.resolve_coreference())
-    >>> et.transition_table.shape
-    (1, 3)
-    >>> et.grid['I'].tolist() == eg.grid['I'].tolist()
+    >>> et.transition_table.shape[1] <= 4
     True
-    >>> et.transition_table['I'].tolist()
-    [('S', '-')]
     '''
 
     def __init__(self, eg, n=2):
+        self._n = n
         self._grid = eg.grid
         self._transition_table = self._column_transitions(n)
+
+    @property
+    def n(self):
+        '''Return transition order n'''
+        return self._n
 
     @property
     def grid(self):
@@ -205,23 +242,21 @@ class EntityTransition(object):
     def make_new_transition_table(self, n=3):
         '''Generate a new transition table'''
         self._transition_table = self._column_transitions(n)
+        self._n = n
         return self
 
     def all_prob(self):
         '''Calculate a feature vector using all transitions'''
-        tran_len = len(self.transition_table.iat[0, 0])
-        from itertools import product
         seq = [Constants.SUB, Constants.OBJ, Constants.OTHER, Constants.NOSHOW]
-        d = {}
-        for pro in product(seq, repeat = tran_len):
-#            pprint(pro)
-            d[pro] = self.prob(pro)
-        return d
+        probs = {}
+        for pro in product(seq, repeat=self.n):
+            probs[''.join(pro)] = self.prob(pro)
+        return probs
 
     def prob(self, tran):
         '''Calculate probability of a transition'''
         import operator as op
-        assert len(tran) == len(self.transition_table.iat[0, 0])
+        assert len(tran) == self.n
         tbl = self.transition_table
         freq, total = 0, op.mul(*tbl.shape)
         for _col in tbl.columns:
@@ -230,14 +265,18 @@ class EntityTransition(object):
         return freq / total
 
     def _column_transition(self, col, n):
-        assert col in self.grid.columns
         column = self.grid[col].tolist()
-        #pprint(column)
-        assert len(column) >= n
-        column_tran, tran_len = [], len(column) - n + 1
-        for i in range(tran_len):
-            column_tran.append(tuple(column[i:i + n]))
-        assert len(column_tran) == tran_len
+        if len(column) < n:
+            # this is a trick to handle the case
+            # where transition length is greater than the
+            # number of sentences
+            column_tran = [
+                tuple(column + [Constants.NOSHOW] * (n - len(column)))
+            ]
+        else:
+            column_tran, tran_len = [], len(column) - n + 1
+            for i in range(tran_len):
+                column_tran.append(tuple(column[i:i + n]))
         return column_tran
 
     def _column_transitions(self, n):
@@ -247,35 +286,104 @@ class EntityTransition(object):
         return pd.DataFrame.from_dict(transition_table)
 
 
+class TransitionMatrix(object):
+    '''
+    Transition matrix
+    >>> tm = TransitionMatrix(['I like apple juice. He also likes it.'])
+    >>> 'SS' == tm.tran_matrix.columns[0]
+    True
+    >>> 'SO' == tm.tran_matrix.columns[1]
+    True
+    '''
+
+    def __init__(self, corpus, n=2, coref=True):
+        self._corpus = corpus
+        self._n = n
+        self._tran_list = self._make_tran_list(coref, n)
+        self._tran_matrix = self._make_tran_matrix()
+
+    @property
+    def corpus(self):
+        '''Retrun the corpus'''
+        return self._corpus
+
+    @property
+    def n(self):
+        '''Return the order n of transitions'''
+        return self._n
+
+    @property
+    def tran_list(self):
+        '''Return transition list'''
+        return self._tran_list
+
+    @property
+    def tran_matrix(self):
+        '''Return sorted transition matrix ordered by S, O, X, -'''
+        mat = self._tran_matrix
+        seq = [Constants.SUB, Constants.OBJ, Constants.OTHER, Constants.NOSHOW]
+        return mat[sorted(mat.columns,
+                          key=lambda x: [seq.index(c) for c in x])]
+
+    @property
+    def all_transitions(self):
+        '''Return all transition produce by {S, O, X, N}^n'''
+        seq = [Constants.SUB, Constants.OBJ, Constants.OTHER, Constants.NOSHOW]
+        return [''.join(t) for t in product(seq, repeat=self.n)]
+
+    def _make_tran_list(self, coref, n):
+        if coref:
+            return [EntityTransition(
+                EntityGrid(doc).resolve_coreference(), n)
+                    for doc in self.corpus]
+        else:
+            return [EntityTransition(
+                EntityGrid(doc), n) for doc in self.corpus]
+
+    def _make_tran_matrix(self):
+        mat = {}
+        for tran in self.all_transitions:
+            mat[tran] = [t.all_prob()[tran] for t in self.tran_list]
+        return pd.DataFrame.from_dict(mat)
+
+
+def test_et(text, n=2):
+    pprint(text)
+    eg = EntityGrid(text)
+    pprint(eg.grid)
+    pprint(eg.resolve_coreference().grid)
+    et = EntityTransition(eg, n)
+
+    pprint(et.transition_table)
+#    pprint(et.all_prob())
+
+
+def test_tm(*test):
+    tm = TransitionMatrix(test, n=2)
+    pprint(tm.tran_matrix)
+    global df
+    df = tm.tran_matrix
+
+
 if __name__ == '__main__':
     doctest.testmod()
     S, O, X, N = Constants.SUB, Constants.OBJ, Constants.OTHER, Constants.NOSHOW
+    #        T1 = '''
+    #        The Justice Department is conducting an anti-trust trial against Microsoft Corp with evidence that the company is increasingly attempting to crush competitors.
+    #        Microsoft is accused of trying to forcefully buy into markets where its own products are not competitive enough to unseat established brands.
+    #        The case revolves around evidence of Microsoft aggressively pressuring Netscape into merging browser software.
+    #        Microsoft claims its tactics are commonplace and good economically.
+    #        The government may file a civil suit ruling that conspiracy to curb competition through collusion is a violation of the Sherman Act.
+    #        Microsoft continues to show increased earnings despite the trial.
+    #        '''
 
-    T = '''
-            The Justice Department is conducting an anti-trust trial against Microsoft Corp with evidence that the company is increasingly attempting to crush competitors.
-            Microsoft is accused of trying to forcefully buy into markets where its own products are not competitive enough to unseat established brands.
-            The case revolves around evidence of Microsoft aggressively pressuring Netscape into merging browser software.
-            Microsoft claims its tactics are commonplace and good economically.
-            The government may file a civil suit ruling that conspiracy to curb competition through collusion is a violation of the Sherman Act.
-            Microsoft continues to show increased earnings despite the trial.
-            '''
+    T1 = 'My friend is Bob. He loves playing basketball. And he also is good at tennis.'
 
-    #    T = 'My friend is Bob. He loves playing basketball.'
+    T2 = 'I have a friend called Bob. He loves playing basketball. I also love playing basketball. We play basketball together sometimes.'
+    T3 = 'I like apple juice. He also likes it.'
+    T4 = 'The Justice Department is conducting an anti-trust trial against\
+              Microsoft Corp with evidence that the company is increasingly attempting to crush competitors.'
 
-#    T = 'I like apple juice. He also likes it.'
-
-#    T = 'I have a friend called Bob. He loves playing basketball. I also love playing basketball.'
-
-    #    T = 'The Justice Department is conducting an anti-trust trial against\
-    #         Microsoft Corp with evidence that the company is increasingly attempting to crush competitors.'
-
-    EG = EntityGrid(T).resolve_coreference()
-    #    pprint(EG.grid)
-    pprint(EG.grid)
-    #    EG.resolve_coreference()
-    #    pprint(EG.grid)
-    ET = EntityTransition(EG)
-    pprint(ET.transition_table)
-    #    ET.make_new_transition_table()
-    pprint(ET.prob([S, N]))
-    pprint(ET.all_prob())
+    #    test_et('He also likes it. I like apple juice.')
+    test_et(T3)  #)
+    test_tm(T1)
