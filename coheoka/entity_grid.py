@@ -358,8 +358,8 @@ def test_et(text, n=2):
 #    pprint(et.all_prob())
 
 
-def test_tm(*test):
-    tm = TransitionMatrix(test, n=2)
+def test_tm(*test, **kw):
+    tm = TransitionMatrix(test, kw['n'])
     pprint(tm.tran_matrix)
     global df
     df = tm.tran_matrix
@@ -385,5 +385,5 @@ if __name__ == '__main__':
               Microsoft Corp with evidence that the company is increasingly attempting to crush competitors.'
 
     #    test_et('He also likes it. I like apple juice.')
-    test_et(T3)  #)
-    test_tm(T1)
+    test_et(T1)  #)
+#    test_tm(T1,n=2)

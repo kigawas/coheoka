@@ -8,6 +8,7 @@ from nltk import sent_tokenize
 import numpy as np
 from sklearn import cross_validation
 from sklearn.metrics import classification_report
+from sklearn.feature_extraction.text import TfidfVectorizer
 from pprint import pprint
 
 from entity_grid import TransitionMatrix
@@ -18,7 +19,7 @@ class Evaluator(object):
                  corpus,
                  shuffle_times=4,
                  origin_label=1,
-                 shuffle_label_func=lambda x, y: 0):
+                 shuffle_label_func=lambda x, y: -1):
         self._corpus = corpus
         self._origin_matrix = self._label_origin_corpus(origin_label)
         self._shuffled_matrix = self._label_shuffled_corpus(shuffle_times,
@@ -79,22 +80,27 @@ class Evaluator(object):
             res.append((' '.join(sents), label))
         return res
 
-    def evaluate(self, clf=svm.SVC, cv=2):
+    def evaluate(self, clf=svm.LinearSVC, cv=2):
         #        np.random.shuffle(self.matrix)
-        self._X = TransitionMatrix([c for c in self.matrix[:, 0]]).tran_matrix
+        self._X = TransitionMatrix([c for c in self.matrix[:, 0]
+                                    ]).tran_matrix  #.loc[:,['OS']]
         self._y = self.matrix[:, 1].astype(int)
         self._clf = clf()
         X_train, X_test, y_train, y_test = self.X, self.X, self.y, self.y
-        X_train, X_test, y_train, y_test = cross_validation.train_test_split(
-            self.X,
-            self.y,
-            test_size=0.4)
+        #        X_train, X_test, y_train, y_test = cross_validation.train_test_split(
+        #            self.X,
+        #            self.y,
+        #            test_size=0.4)
         self.clf.fit(X_train, y_train)
-        #        print(y_test)
+        #        #        print(y_test)
         #        print(self.clf.predict(X_test))
 
         print(classification_report(y_test, self.clf.predict(X_test)))
-        return self.clf.score(X_test, y_test)
+        print(y_train)
+        print(X_train)
+        print(y_test)
+        print(X_test)
+        return self.clf.predict(X_test)
 
 
 def test(*text):
@@ -123,7 +129,7 @@ if __name__ == '__main__':
         Microsoft continues to show increased earnings despite the trial.
         '''
 
-    #    test(T1,T1)
+    test(T1)
     #    test(T1)
-    e = Evaluator(ctxt)
-#    e.evaluate()
+    #    e = Evaluator(ctxt)
+    #    e.evaluate()
