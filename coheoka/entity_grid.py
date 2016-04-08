@@ -26,29 +26,35 @@ class StanfordCoreNLP(object):
                           },
                           data=text)
         output = r.text
-        if ('outputFormat' in properties and
-                properties['outputFormat'] == 'json'):
-            try:
-                output = json.loads(output, strict=False)
-            except:
-                pass
+        try:
+            output = json.loads(output, strict=False)
+        except:
+            pass
         return output
 
 
 class CoreNLP(object):
     '''Connect CoreNLP server'''
     _NLP = StanfordCoreNLP('http://localhost:9000')
-    _PROP = {'annotators':
-             'tokenize, ssplit, pos, lemma, ner, depparse, openie, coref',
-             "coref.md.type": "dep",
-             "coref.mode": "statistical",
-             'outputFormat': 'json'}
+    _LOCAL_DEMO_PROP = {
+        'annotators':
+        'tokenize, ssplit, pos, lemma, ner, depparse, openie, coref',
+        "openie.resolve_coref": "true",
+        'outputFormat': 'json'
+    }
+    _ONLINE_DEMO_PROP = {
+        "annotators": "tokenize,ssplit,pos,ner,depparse,openie,coref",
+        "coref.md.type": "dep",
+        "coref.mode": "statistical",
+        'outputFormat': 'json'
+    }
 
     @staticmethod
     def annotate(text):
         '''Get result from CoreNLP via JSON'''
         try:
-            return CoreNLP.nlp().annotate(text, properties=CoreNLP._PROP)
+            return CoreNLP.nlp().annotate(text,
+                                          properties=CoreNLP._ONLINE_DEMO_PROP)
         except UnicodeError:
             pprint(text)
 
@@ -332,13 +338,21 @@ class TransitionMatrix(object):
         return [''.join(t) for t in product(seq, repeat=self.n)]
 
     def _make_tran_list(self, coref, n):
-        if coref:
-            return [EntityTransition(
-                EntityGrid(doc).resolve_coreference(), n)
-                    for doc in self.corpus]
-        else:
-            return [EntityTransition(
-                EntityGrid(doc), n) for doc in self.corpus]
+        tran_list = []
+        new_corpus = []
+        for i, doc in enumerate(self.corpus):
+            try:
+                if coref:
+                    eg = EntityGrid(doc).resolve_coreference()
+                else:
+                    eg = EntityGrid(doc)
+                tran_list.append(EntityTransition(eg, n))
+                new_corpus.append(doc)
+            except (UnicodeError, TypeError) as e:
+                print('Error detected at {}: {}'.format(i, e))
+        self._corpus = new_corpus
+
+        return tran_list
 
     def _make_tran_matrix(self):
         mat = {}
@@ -355,7 +369,7 @@ def test_et(text, n=2):
     et = EntityTransition(eg, n)
 
     pprint(et.transition_table)
-#    pprint(et.all_prob())
+    pprint(et.all_prob())
 
 
 def test_tm(*test, **kw):
@@ -368,22 +382,21 @@ def test_tm(*test, **kw):
 if __name__ == '__main__':
     doctest.testmod()
     S, O, X, N = Constants.SUB, Constants.OBJ, Constants.OTHER, Constants.NOSHOW
-    #        T1 = '''
-    #        The Justice Department is conducting an anti-trust trial against Microsoft Corp with evidence that the company is increasingly attempting to crush competitors.
-    #        Microsoft is accused of trying to forcefully buy into markets where its own products are not competitive enough to unseat established brands.
-    #        The case revolves around evidence of Microsoft aggressively pressuring Netscape into merging browser software.
-    #        Microsoft claims its tactics are commonplace and good economically.
-    #        The government may file a civil suit ruling that conspiracy to curb competition through collusion is a violation of the Sherman Act.
-    #        Microsoft continues to show increased earnings despite the trial.
-    #        '''
+    T1 = '''
+            The Justice Department is conducting an anti-trust trial against Microsoft Corp with evidence that the company is increasingly attempting to crush competitors.
+            Microsoft is accused of trying to forcefully buy into markets where its own products are not competitive enough to unseat established brands.
+            The case revolves around evidence of Microsoft aggressively pressuring Netscape into merging browser software.
+            Microsoft claims its tactics are commonplace and good economically.
+            The government may file a civil suit ruling that conspiracy to curb competition through collusion is a violation of the Sherman Act.
+            Microsoft continues to show increased earnings despite the trial.
+            '''
 
-    T1 = 'My friend is Bob. He loves playing basketball. And he also is good at tennis.'
+    #    T1 = 'My friend is Bob. He loves playing basketball. And he also is good at tennis.'
 
     T2 = 'I have a friend called Bob. He loves playing basketball. I also love playing basketball. We play basketball together sometimes.'
     T3 = 'I like apple juice. He also likes it.'
     T4 = 'The Justice Department is conducting an anti-trust trial against\
               Microsoft Corp with evidence that the company is increasingly attempting to crush competitors.'
 
-    #    test_et('He also likes it. I like apple juice.')
-    test_et(T1)  #)
-#    test_tm(T1,n=2)
+    test_et(T2)  #)
+#    test_tm(T1*10,T2,n=2)

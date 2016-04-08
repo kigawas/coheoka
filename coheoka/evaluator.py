@@ -3,21 +3,20 @@
 Evaluator based on transition matrix
 """
 from __future__ import print_function, division
-from sklearn import svm
 from nltk import sent_tokenize
-import numpy as np
-from sklearn import cross_validation
-from sklearn.metrics import classification_report
-from sklearn.feature_extraction.text import TfidfVectorizer
+
+from sklearn import cross_validation, svm
 from pprint import pprint
+import numpy as np
 
 from entity_grid import TransitionMatrix
+from ranking import transform_pairwise
 
 
 class Evaluator(object):
     def __init__(self,
                  corpus,
-                 shuffle_times=4,
+                 shuffle_times=20,
                  origin_label=1,
                  shuffle_label_func=lambda x, y: -1):
         self._corpus = corpus
@@ -80,36 +79,25 @@ class Evaluator(object):
             res.append((' '.join(sents), label))
         return res
 
-    def evaluate(self, clf=svm.LinearSVC, cv=2):
-        #        np.random.shuffle(self.matrix)
+    def evaluate(self, clf=svm.LinearSVC):
         self._X = TransitionMatrix([c for c in self.matrix[:, 0]
-                                    ]).tran_matrix  #.loc[:,['OS']]
+                                    ]).tran_matrix.as_matrix()  #.loc[:,['OS']]
         self._y = self.matrix[:, 1].astype(int)
         self._clf = clf()
-        X_train, X_test, y_train, y_test = self.X, self.X, self.y, self.y
-        #        X_train, X_test, y_train, y_test = cross_validation.train_test_split(
-        #            self.X,
-        #            self.y,
-        #            test_size=0.4)
+        X, y = transform_pairwise(self.X, self.y)
+        X_train, X_test, y_train, y_test = cross_validation.train_test_split(
+            X,
+            y,
+            test_size=0.5)
         self.clf.fit(X_train, y_train)
-        #        #        print(y_test)
-        #        print(self.clf.predict(X_test))
-
-        print(classification_report(y_test, self.clf.predict(X_test)))
-        print(y_train)
-        print(X_train)
-        print(y_test)
-        print(X_test)
-        return self.clf.predict(X_test)
+        return self.clf.score(X_test, y_test)
 
 
 def test(*text):
-    e = Evaluator(text, 4)
-    #    pprint(e.matrix)
-
+    e = Evaluator(text)
     pprint(e.evaluate())
-#    pprint(e.X )
-#    pprint(e.y)
+    pprint(e.y)
+
 
 if __name__ == '__main__':
 
@@ -129,7 +117,14 @@ if __name__ == '__main__':
         Microsoft continues to show increased earnings despite the trial.
         '''
 
+    T2 = '''Barbara Meier (born July 25, 1986 in Amberg, Germany) is a model. She is the winner of the second cycle (season) of "Germany's Next Topmodel", presented by Heidi Klum.
+        Biography.
+        Meier was born in Amberg. Before "GNTM" she studied mathematics.
+        While shopping at a mall, she was invited by a model scout to a casting for "GNTM". Out of 16,421 girls in the casting, she was chosen among 14 other girls to be on the TV show.
+        During the show she won a role alongside Heidi Klum in a TV commercial for McDonald's.
+        In the last episode (the finale), she won the show and became "Germany's Next Topmodel".
+        After "Germany's Next Topmodel" Meier was in many magazines around the world such as "Vogue" (Taiwan), "Madame Figaro" (Russia) and "L'Officiel" (France) and worked for many brands such as "Pantene".
+        In her private life, Meier is in a steady relationship since 2003.'''
+
+    #    test(*[T1, T2])
     test(T1)
-    #    test(T1)
-    #    e = Evaluator(ctxt)
-    #    e.evaluate()
