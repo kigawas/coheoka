@@ -8,6 +8,7 @@ from nltk import sent_tokenize
 from sklearn import cross_validation, svm
 from pprint import pprint
 import numpy as np
+from scipy.stats import kendalltau as tau
 
 from entity_grid import TransitionMatrix
 from ranking import transform_pairwise
@@ -25,9 +26,7 @@ class Evaluator(object):
                                                             shuffle_label_func)
         self._matrix = np.concatenate((self._origin_matrix,
                                        self._shuffled_matrix))
-        self._X = None
-        self._y = None
-        self._clf = None
+        self._X, self._y, self._clf = None, None, None
 
     @property
     def corpus(self):
@@ -79,24 +78,48 @@ class Evaluator(object):
             res.append((' '.join(sents), label))
         return res
 
-    def evaluate(self, clf=svm.LinearSVC):
-        self._X = TransitionMatrix([c for c in self.matrix[:, 0]
-                                    ]).tran_matrix.as_matrix()  #.loc[:,['OS']]
-        self._y = self.matrix[:, 1].astype(int)
-        self._clf = clf()
+    def make_data_and_clf(self, clf=svm.LinearSVC):
+        if self._X is None:
+            self._X = TransitionMatrix([c for c in self.matrix[:, 0]
+                                        ]).tran_matrix.as_matrix(
+                                        )  #.loc[:,['OS']]
+            self._y = self.matrix[:, 1].astype(int)
+            self._clf = clf
+        else:
+            pass
+        return self
+
+    def predict(self, clf, X):
+        return np.dot(X, clf.coef_.ravel())
+
+    def get_ranking_order(self, clf, X):
+        return np.argsort(clf.predict(X))
+
+    def evaluate_tau(self, test_size=0.3):
         X, y = transform_pairwise(self.X, self.y)
         X_train, X_test, y_train, y_test = cross_validation.train_test_split(
             X,
             y,
-            test_size=0.5)
-        self.clf.fit(X_train, y_train)
-        return self.clf.score(X_test, y_test)
+            test_size=test_size)
+        c = self.clf()
+        c.fit(X_train, y_train)
+        return tau(self.predict(c, X_test), y_test)
+
+    def evaluate_accuracy(self, test_size=0.3):
+        X, y = transform_pairwise(self.X, self.y)
+        X_train, X_test, y_train, y_test = cross_validation.train_test_split(
+            X,
+            y,
+            test_size=test_size)
+        c = self.clf()
+        c.fit(X_train, y_train)
+        return c.score(X_test, y_test)
 
 
 def test(*text):
-    e = Evaluator(text)
-    pprint(e.evaluate())
-    pprint(e.y)
+    e = Evaluator(text).make_data_and_clf()
+    pprint([e.evaluate_accuracy() for i in range(5)])
+    pprint([e.evaluate_tau()[0] for i in range(5)])
 
 
 if __name__ == '__main__':
@@ -127,4 +150,4 @@ if __name__ == '__main__':
         In her private life, Meier is in a steady relationship since 2003.'''
 
     #    test(*[T1, T2])
-    test(T1)
+    test(T2)
