@@ -1,5 +1,5 @@
 # coheoka
-Coherence evaluation using CoreNLP's Python wrapper.
+Coherence evaluation using Stanford's CoreNLP tool.
 
 This repository is designed for entity-base coherence.
 
