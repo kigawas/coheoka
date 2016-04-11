@@ -42,7 +42,7 @@ class Evaluator(object):
             return self._X
         else:
             raise AttributeError(
-                'Not generated. Please call `evaluate` first.')
+                'Not generated. Please call `make_data_and_clf` first.')
 
     @property
     def y(self):
@@ -50,11 +50,15 @@ class Evaluator(object):
             return self._y
         else:
             raise AttributeError(
-                'Not generated. Please call `evaluate` first.')
+                'Not generated. Please call `make_data_and_clf` first.')
 
     @property
     def clf(self):
-        return self._clf
+        if self._clf is not None:
+            return self._clf
+        else:
+            raise AttributeError(
+                'Not generated. Please call `make_data_and_clf` first.')
 
     def _label_origin_corpus(self, label):
         res = []
