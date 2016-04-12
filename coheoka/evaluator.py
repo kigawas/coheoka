@@ -154,4 +154,6 @@ if __name__ == '__main__':
         In her private life, Meier is in a steady relationship since 2003.'''
 
     #    test(*[T1, T2])
-    test(T2)
+    e = Evaluator(ct)
+    e.make_data_and_clf()
+    pprint(e.evaluate_accuracy())
