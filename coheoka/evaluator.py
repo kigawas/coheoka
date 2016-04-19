@@ -10,7 +10,7 @@ from pprint import pprint
 import numpy as np
 from scipy.stats import kendalltau as tau
 
-from entity_grid import TransitionMatrix
+from entity_transition import TransitionMatrix
 from ranking import transform_pairwise
 
 
@@ -79,14 +79,13 @@ class Evaluator(object):
         for i in range(times):
             shuffle(sents)
             label = label_func(sents, origin_sents)
-            res.append((' '.join(sents), label))
+            res.append((' '.join(sents[:]), label))
         return res
 
     def make_data_and_clf(self, clf=svm.LinearSVC):
         if self._X is None:
             self._X = TransitionMatrix([c for c in self.matrix[:, 0]
-                                        ]).tran_matrix.as_matrix(
-                                        )  #.loc[:,['OS']]
+                                        ]).tran_matrix.as_matrix()
             self._y = self.matrix[:, 1].astype(int)
             self._clf = clf
         else:
@@ -144,8 +143,7 @@ if __name__ == '__main__':
         Microsoft continues to show increased earnings despite the trial.
         '''
 
-    T2 = '''Barbara Meier (born July 25, 1986 in Amberg, Germany) is a model. She is the winner of the second cycle (season) of "Germany's Next Topmodel", presented by Heidi Klum.
-        Biography.
+    T2 = '''
         Meier was born in Amberg. Before "GNTM" she studied mathematics.
         While shopping at a mall, she was invited by a model scout to a casting for "GNTM". Out of 16,421 girls in the casting, she was chosen among 14 other girls to be on the TV show.
         During the show she won a role alongside Heidi Klum in a TV commercial for McDonald's.
@@ -153,7 +151,7 @@ if __name__ == '__main__':
         After "Germany's Next Topmodel" Meier was in many magazines around the world such as "Vogue" (Taiwan), "Madame Figaro" (Russia) and "L'Officiel" (France) and worked for many brands such as "Pantene".
         In her private life, Meier is in a steady relationship since 2003.'''
 
-    #    test(*[T1, T2])
+    test(*[T1, T2, T3, T4])
     e = Evaluator(ct)
     e.make_data_and_clf()
     pprint(e.evaluate_accuracy())
