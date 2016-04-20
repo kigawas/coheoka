@@ -79,7 +79,7 @@ class Evaluator(object):
         for i in range(times):
             shuffle(sents)
             label = label_func(sents, origin_sents)
-            res.append((' '.join(sents[:]), label))
+            res.append((' '.join(sents[:-1]), label))
         return res
 
     def make_data_and_clf(self, clf=svm.LinearSVC):

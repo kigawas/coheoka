@@ -17,7 +17,7 @@ class EntityProbability(object):
         self._et = EntityTransition(self._eg)
         self._table = self._et.transition_table
         self._probs = self._et.all_prob()
-        self._prob_vector = self._make_vector()
+        self._prob_vector = self._coherence_prob()
 
     @property
     def entity_transition(self):
@@ -32,7 +32,7 @@ class EntityProbability(object):
                  for itm in self._table[col].tolist()]
         return sum(trans) / len(trans)
 
-    def _make_vector(self):
+    def _coherence_prob(self):
         res = []
         for col in self._table.columns:
             res.append(self._get_column_prob(col))
@@ -55,8 +55,8 @@ if __name__ == '__main__':
               Microsoft Corp with evidence that the company is increasingly attempting to crush competitors.'
 
     from pprint import pprint
-    print(EntityProbability(T1)._make_vector())
-    pprint([(t, EntityProbability(t)._make_vector())
+    print(EntityProbability(T1)._coherence_prob())
+    pprint([(t, EntityProbability(t)._coherence_prob())
             for t in utils.add_sents(T1, 5, T2)])
-    pprint([(t, EntityProbability(t)._make_vector())
+    pprint([(t, EntityProbability(t)._coherence_prob())
             for t in utils.remove_sents(T1, 5)])
