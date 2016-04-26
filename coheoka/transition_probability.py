@@ -14,32 +14,42 @@ class EntityProbability(object):
     def __init__(self, text, coref=True):
         self._eg = EntityGrid(text).resolve_coreference(
         ) if coref else EntityGrid(text)
-        self._et = EntityTransition(self._eg)
-        self._table = self._et.transition_table
-        self._probs = self._et.all_prob()
-        self._prob_vector = self._coherence_prob()
+        self._coher_prob = self._coherence_prob()
 
     @property
-    def entity_transition(self):
-        return self._et
+    def grid(self):
+        return self._eg.grid
 
     @property
-    def probs(self):
-        return self._probs
+    def coherence_prob(self):
+        return self._coher_prob
 
     def _get_column_prob(self, col):
-        trans = [log(self._probs[''.join(itm)])
-                 for itm in self._table[col].tolist()]
-        return sum(trans) / len(trans)
+        column = self._eg.grid[col].tolist()
+        sent_len = len(column)
+        transition_count = {}
+        for tran in zip(column[1:], column[:-1]):
+            transition_count[tran] = transition_count.get(tran, 0) + 1
+        probs = []
+        for i, role in enumerate(column):
+            if i == 0:
+                probs.append(log(column.count(column[0]) / sent_len))
+            else:
+                tran_cnt = transition_count[(column[i], column[i - 1])]
+                ent_cnt = column.count(column[i - 1])
+                probs.append(log(tran_cnt / ent_cnt))
+        assert all([p <= 0.0 for p in probs])
+        return sum(probs) / len(probs)
 
     def _coherence_prob(self):
         res = []
-        for col in self._table.columns:
+        for col in self._eg.grid.columns:
             res.append(self._get_column_prob(col))
         return sum(res) / len(res)
 
 
 if __name__ == '__main__':
+    from pprint import pprint
     T1 = '''
         The Justice Department is conducting an anti-trust trial against Microsoft Corp with evidence that the company is increasingly attempting to crush competitors.
         Microsoft is accused of trying to forcefully buy into markets where its own products are not competitive enough to unseat established brands.
@@ -50,13 +60,22 @@ if __name__ == '__main__':
         '''
 
     T2 = 'I have a friend called Bob. He loves playing basketball. I also love playing basketball. We play basketball together sometimes.'
-    T3 = 'I like apple juice. He also likes it.'
+    T3 = 'I like apple juice. He also likes it. He also likes playing basketball.'
     T4 = 'The Justice Department is conducting an anti-trust trial against\
               Microsoft Corp with evidence that the company is increasingly attempting to crush competitors.'
 
+    T5 = 'You should heed my advice, people should be useing computers.Computers are an exelent way to comunicate.'
+
+    T = T2
+    e = EntityProbability(T)
+    #pprint(e._eg.grid)
+    pprint(e.coherence_prob)
+
     from pprint import pprint
-    print(EntityProbability(T1)._coherence_prob())
-    pprint([(t, EntityProbability(t)._coherence_prob())
-            for t in utils.add_sents(T1, 5, T2)])
-    pprint([(t, EntityProbability(t)._coherence_prob())
-            for t in utils.remove_sents(T1, 5)])
+    print(EntityProbability(T)._coherence_prob())
+    print([('', EntityProbability(t)._coherence_prob())
+           for t in utils.add_sents(T, 5, T5)])
+    print([('', EntityProbability(t)._coherence_prob())
+           for t in utils.remove_sents(T, 5)])
+    print([('', EntityProbability(t)._coherence_prob())
+           for t in utils.shuffle_sents(T, 5)])
