@@ -12,6 +12,7 @@ from scipy.stats import kendalltau as tau
 
 from entity_transition import TransitionMatrix
 from ranking import transform_pairwise
+from utils import tau_score_of_sentents
 
 
 class Evaluator(object):
@@ -79,7 +80,7 @@ class Evaluator(object):
         for i in range(times):
             shuffle(sents)
             label = label_func(sents, origin_sents)
-            res.append((' '.join(sents[:-1]), label))
+            res.append((' '.join(sents), label))
         return res
 
     def make_data_and_clf(self, clf=svm.LinearSVC):
@@ -153,5 +154,8 @@ if __name__ == '__main__':
 
     test(*[T1, T2, T3, T4])
     e = Evaluator(ct)
+    e = Evaluator(ct, shuffle_label_func=tau_score_of_sentents)
     e.make_data_and_clf()
+    pprint(e.evaluate_accuracy())
+    pprint(e.evaluate_accuracy())
     pprint(e.evaluate_accuracy())
