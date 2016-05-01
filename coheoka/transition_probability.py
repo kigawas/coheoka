@@ -5,6 +5,8 @@ Entity transition probability
 from __future__ import print_function, division
 from math import log
 
+import numpy as np
+
 from entity_transition import EntityTransition
 from entity_grid import EntityGrid
 import utils
@@ -27,6 +29,7 @@ class EntityProbability(object):
     def _get_column_prob(self, col):
         column = self._eg.grid[col].tolist()
         sent_len = len(column)
+        assert sent_len > 1
         transition_count = {}
         for tran in zip(column[1:], column[:-1]):
             transition_count[tran] = transition_count.get(tran, 0) + 1
@@ -48,6 +51,39 @@ class EntityProbability(object):
         return sum(res) / len(res)
 
 
+class ProbabilityVector(object):
+    def __init__(self, corpus):
+        self._corpus = corpus
+        self._probs = self._make_probs()
+
+    @property
+    def corpus(self):
+        return self._corpus
+
+    @property
+    def probs(self):
+        return self._probs
+
+    @property
+    def mean(self):
+        return np.mean(self.probs)
+
+    @property
+    def std(self):
+        return np.std(self.probs)
+
+    @property
+    def var(self):
+        return np.var(self.probs)
+
+    def _make_probs(self):
+        res = []
+        for text in self.corpus:
+            p = EntityProbability(text).coherence_prob
+            res.append(p)
+        return res
+
+
 if __name__ == '__main__':
     from pprint import pprint
     T1 = '''
@@ -64,7 +100,7 @@ if __name__ == '__main__':
     T4 = 'The Justice Department is conducting an anti-trust trial against\
               Microsoft Corp with evidence that the company is increasingly attempting to crush competitors.'
 
-    T5 = 'You should heed my advice, people should be useing computers.Computers are an exelent way to comunicate.'
+    T5 = 'You should heed my advice, people should be useing computers. Computers are an exelent way to comunicate.'
 
     T = T2
     e = EntityProbability(T)
@@ -79,3 +115,5 @@ if __name__ == '__main__':
            for t in utils.remove_sents(T, 5)])
     print([('', EntityProbability(t)._coherence_prob())
            for t in utils.shuffle_sents(T, 5)])
+    pv = ProbabilityVector([T1, T2, T3, T5])
+    print(pv.probs, pv.mean, pv.var)
