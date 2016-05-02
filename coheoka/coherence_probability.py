@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-Entity transition probability
+Coherence probability based on entity grid
 '''
 from __future__ import print_function, division
 from math import log
@@ -12,7 +12,7 @@ from entity_grid import EntityGrid
 import utils
 
 
-class EntityProbability(object):
+class CoherenceProbability(object):
     def __init__(self, text, coref=True):
         self._eg = EntityGrid(text).resolve_coreference(
         ) if coref else EntityGrid(text)
@@ -76,11 +76,19 @@ class ProbabilityVector(object):
     def var(self):
         return np.var(self.probs)
 
+    def evaluate_coherence(self, text):
+        p = CoherenceProbability(text)
+        res = p.coherence_prob - self.mean
+        return res
+
     def _make_probs(self):
         res = []
         for text in self.corpus:
-            p = EntityProbability(text).coherence_prob
-            res.append(p)
+            try:
+                p = CoherenceProbability(text).coherence_prob
+                res.append(p)
+            except:
+                print(text)
         return res
 
 
@@ -97,23 +105,23 @@ if __name__ == '__main__':
 
     T2 = 'I have a friend called Bob. He loves playing basketball. I also love playing basketball. We play basketball together sometimes.'
     T3 = 'I like apple juice. He also likes it. He also likes playing basketball.'
-    T4 = 'The Justice Department is conducting an anti-trust trial against\
-              Microsoft Corp with evidence that the company is increasingly attempting to crush competitors.'
-
-    T5 = 'You should heed my advice, people should be useing computers. Computers are an exelent way to comunicate.'
+    T4 = '''A bank gets money from lenders, and pays interest. The bank then lends this money to borrowers. Banks allow borrowers and lenders of different sizes to meet.'''
+    T5 = 'You should heed my advice, people should be using computers. Computers are an exelent way to comunicate.'
 
     T = T2
-    e = EntityProbability(T)
+    e = CoherenceProbability(T)
     #pprint(e._eg.grid)
     pprint(e.coherence_prob)
 
     from pprint import pprint
-    print(EntityProbability(T)._coherence_prob())
-    print([('', EntityProbability(t)._coherence_prob())
+    print(CoherenceProbability(T)._coherence_prob())
+    print([('', CoherenceProbability(t)._coherence_prob())
            for t in utils.add_sents(T, 5, T5)])
-    print([('', EntityProbability(t)._coherence_prob())
+    print([('', CoherenceProbability(t)._coherence_prob())
            for t in utils.remove_sents(T, 5)])
-    print([('', EntityProbability(t)._coherence_prob())
+    print([('', CoherenceProbability(t)._coherence_prob())
            for t in utils.shuffle_sents(T, 5)])
-    pv = ProbabilityVector([T1, T2, T3, T5])
-    print(pv.probs, pv.mean, pv.var)
+    ct = [T1, T2, T3, T4, T5]
+    pv = ProbabilityVector(ct)
+    print(pv.probs, pv.mean, pv.std)
+    print(pv.evaluate_coherence('I like apple juice. You should hear my advice. Computers are an exelent way to comunicate.'))

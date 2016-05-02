@@ -27,7 +27,7 @@ class Evaluator(object):
                                                             shuffle_label_func)
         self._matrix = np.concatenate((self._origin_matrix,
                                        self._shuffled_matrix))
-        self._X, self._y, self._clf = None, None, None
+        self._X, self._y, self._clf, self._fitted_clf = None, None, None, None
 
     @property
     def corpus(self):
@@ -61,6 +61,13 @@ class Evaluator(object):
             raise AttributeError(
                 'Not generated. Please call `make_data_and_clf` first.')
 
+    @property
+    def fitted_clf(self):
+        if self._fitted_clf is not None:
+            return self._fitted_clf
+        else:
+            raise AttributeError('Not generated. Please call `fit` first.')
+
     def _label_origin_corpus(self, label):
         res = []
         for text in self.corpus:
@@ -75,12 +82,13 @@ class Evaluator(object):
     def _shuffle_text(self, text, times, label_func):
         from random import shuffle
         origin_sents = sent_tokenize(text)
+        assert len(origin_sents) > 1
         sents = sent_tokenize(text)
         res = []
         for i in range(times):
             shuffle(sents)
             label = label_func(sents, origin_sents)
-            res.append((' '.join(sents), label))
+            res.append((' '.join(sents[:-1]), label))
         return res
 
     def make_data_and_clf(self, clf=svm.LinearSVC):
@@ -119,11 +127,33 @@ class Evaluator(object):
         c.fit(X_train, y_train)
         return c.score(X_test, y_test)
 
+    def fit(self):
+        X, y = transform_pairwise(self.X, self.y)
+        self._fitted_clf = self.clf().fit(X, y)
+        return self
+
+    def evaluate_coherence(self, text):
+        origin_len = len(self._origin_matrix)
+        x = TransitionMatrix([text]).tran_matrix.as_matrix()
+        y = [-1]
+        ref_x = self.X[:origin_len]
+        ref_y = [1] * origin_len
+        X = np.concatenate((x, ref_x))
+#        y = np.concatenate((y, ref_y))
+#        X, y = transform_pairwise(X, y)
+        return self.predict(self.fitted_clf,x)
+
 
 def test(*text):
+    global e
     e = Evaluator(text).make_data_and_clf()
     pprint([e.evaluate_accuracy() for i in range(5)])
     pprint([e.evaluate_tau()[0] for i in range(5)])
+    #text = '''A railfan is a person who likes railways and trains.  You should hear my advice. Computers are an exelent way to comunicate.'''
+    #text = 'The Justice Department is conducting an '
+    t = 'My friend is Bob. He loves playing basketball. And he also is good at tennis.'
+    e.fit()
+    print(e.evaluate_coherence(t))
 
 
 if __name__ == '__main__':
@@ -131,9 +161,10 @@ if __name__ == '__main__':
     T1 = 'My friend is Bob. He loves playing basketball. And he also is good at tennis.'
 
     T2 = 'I have a friend called Bob. He loves playing basketball. I also love playing basketball. We play basketball together sometimes.'
-    T3 = 'I like apple juice. He also likes it.'
-    T4 = 'The Justice Department is conducting an anti-trust trial against\
-              Microsoft Corp with evidence that the company is increasingly attempting to crush competitors.'
+    T3 = 'I like apple juice. He also likes it. And he almost drinks apple juice every day.'
+    T4 = '''An invention is a new thing that someone has made. The computer was an invention when it was first made. We say when it was "invented". New things that are made or created are called inventions. The car is an invention that everyone knows.
+Ideas are also called inventions. Writers can invent characters, and then invent a story about them. Inventions are made by inventors.
+Inventing.'''
 
     T1 = '''
         The Justice Department is conducting an anti-trust trial against Microsoft Corp with evidence that the company is increasingly attempting to crush competitors.
@@ -153,9 +184,9 @@ if __name__ == '__main__':
         In her private life, Meier is in a steady relationship since 2003.'''
 
     test(*[T1, T2, T3, T4])
-    e = Evaluator(ct)
-    e = Evaluator(ct, shuffle_label_func=tau_score_of_sentents)
-    e.make_data_and_clf()
-    pprint(e.evaluate_accuracy())
-    pprint(e.evaluate_accuracy())
-    pprint(e.evaluate_accuracy())
+    #e = Evaluator(w20)
+    #e = Evaluator(w20, shuffle_label_func=tau_score_of_sentents)
+    #e.make_data_and_clf()
+    #    pprint(e.evaluate_accuracy())
+    #    pprint(e.evaluate_accuracy())
+    #    pprint(e.evaluate_accuracy())
