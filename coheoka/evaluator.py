@@ -12,7 +12,6 @@ from scipy.stats import kendalltau as tau
 
 from entity_transition import TransitionMatrix
 from ranking import transform_pairwise
-from utils import tau_score_of_sentents
 
 
 class Evaluator(object):
@@ -133,15 +132,8 @@ class Evaluator(object):
         return self
 
     def evaluate_coherence(self, text):
-        origin_len = len(self._origin_matrix)
         x = TransitionMatrix([text]).tran_matrix.as_matrix()
-        y = [-1]
-        ref_x = self.X[:origin_len]
-        ref_y = [1] * origin_len
-        X = np.concatenate((x, ref_x))
-#        y = np.concatenate((y, ref_y))
-#        X, y = transform_pairwise(X, y)
-        return self.predict(self.fitted_clf,x)
+        return self.predict(self.fitted_clf, x)
 
 
 def test(*text):
@@ -184,9 +176,9 @@ Inventing.'''
         In her private life, Meier is in a steady relationship since 2003.'''
 
     test(*[T1, T2, T3, T4])
-    #e = Evaluator(w20)
-    #e = Evaluator(w20, shuffle_label_func=tau_score_of_sentents)
-    #e.make_data_and_clf()
+    # e = Evaluator(w20)
+    # e = Evaluator(w20, shuffle_label_func=tau_score_of_sentents)
+    # e.make_data_and_clf()
     #    pprint(e.evaluate_accuracy())
     #    pprint(e.evaluate_accuracy())
     #    pprint(e.evaluate_accuracy())

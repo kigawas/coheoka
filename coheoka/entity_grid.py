@@ -124,7 +124,8 @@ class EntityGrid(object):
         return noun2lemma
 
     def _set_up_grid(self):
-        depens, entities, noun2lemma = self._depens, self._entity_tokens, self._noun2lemma
+        depens, entities, noun2lemma = self._depens, self._entity_tokens,\
+            self._noun2lemma
         assert len(depens) == len(entities)
         grid = defaultdict(
             lambda: [Constants.NOSHOW for i in range(len(depens))])
@@ -145,7 +146,7 @@ class EntityGrid(object):
 
             for n_dp in nouns_dp:
                 grid[noun2lemma[n_dp['dependentGloss']]][i] = \
-                    Constants.get_role(n_dp['dep']) # yapf: disable
+                    Constants.get_role(n_dp['dep'])  # yapf: disable
         return pd.DataFrame.from_dict(grid)
 
     def _map_phrase_to_entity(self, phrase):
@@ -155,7 +156,7 @@ class EntityGrid(object):
         nouns = [w for w in phrase.split(' ') if w in self.nouns]
         lemmas = [self.noun2lemma(w)
                   for w in nouns if self.noun2lemma(w) in self.grid.columns]
-        #pprint(lemmas)
+        # pprint(lemmas)
         return lemmas[0] if lemmas != [] else None
 
     def _add_column(self, _c1, _c2):

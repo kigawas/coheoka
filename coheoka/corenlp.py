@@ -2,7 +2,8 @@
 '''
 Stanford CoreNLP wrapper
 '''
-import requests, json
+import json
+import requests
 
 
 class StanfordCoreNLP(object):

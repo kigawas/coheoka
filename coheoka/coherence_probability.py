@@ -7,7 +7,6 @@ from math import log
 
 import numpy as np
 
-from entity_transition import EntityTransition
 from entity_grid import EntityGrid
 import utils
 
@@ -124,4 +123,5 @@ if __name__ == '__main__':
     ct = [T1, T2, T3, T4, T5]
     pv = ProbabilityVector(ct)
     print(pv.probs, pv.mean, pv.std)
-    print(pv.evaluate_coherence('I like apple juice. You should hear my advice. Computers are an exelent way to comunicate.'))
+    print(pv.evaluate_coherence(
+        'I like apple juice. You should hear my advice. Computers are an exelent way to comunicate.'))

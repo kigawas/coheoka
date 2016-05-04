@@ -143,7 +143,7 @@ class TransitionMatrix(object):
                     eg = EntityGrid(doc)
                 tran_list.append(EntityTransition(eg, n))
                 new_corpus.append(doc)
-            except (UnicodeError, TypeError) as e:  
+            except (UnicodeError, TypeError) as e:
                 print(doc)
                 print('Error detected at {}: {}'.format(i, e))
         self._corpus = new_corpus
