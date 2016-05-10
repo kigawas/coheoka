@@ -9,7 +9,6 @@ from __future__ import print_function, division
 from math import log
 
 import numpy as np
-from nltk import sent_tokenize
 
 from entity_grid import EntityGrid
 
