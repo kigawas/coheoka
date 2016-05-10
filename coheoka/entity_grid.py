@@ -7,8 +7,9 @@ Reference: Barzilay, R., & Lapata, M. (2008).
 '''
 from __future__ import print_function, division
 from collections import defaultdict
-import doctest
 from pprint import pprint
+import doctest
+import os
 
 import pandas as pd
 
@@ -17,7 +18,8 @@ from corenlp import StanfordCoreNLP
 
 class CoreNLP(object):
     '''Connect CoreNLP server'''
-    _NLP = StanfordCoreNLP('http://localhost:9000')
+    _NLP = StanfordCoreNLP(os.environ.get('CORENLP_IP') or
+                           'http://localhost:9000')
     _LOCAL_DEMO_PROP = {
         'annotators':
         'tokenize, ssplit, pos, lemma, ner, depparse, openie, coref',

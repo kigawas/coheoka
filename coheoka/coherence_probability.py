@@ -82,8 +82,6 @@ class ProbabilityVector(object):
         return np.var(self.probs)
 
     def evaluate_coherence(self, text):
-        if len(sent_tokenize(text)) == 1:
-            return 'Only one sentence.'
         p = CoherenceProbability(text)
         res = p.coherence_prob - self.mean
         return p.coherence_prob, res
