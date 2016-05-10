@@ -4,6 +4,7 @@ Preprocessing utilities
 '''
 
 from random import shuffle, sample
+import cPickle as pickle
 
 from nltk import sent_tokenize
 from scipy.stats import kendalltau as tau
@@ -45,3 +46,12 @@ def tau_score_of_sentents(sent1_tokens, sent2_tokens):
         return 0
     else:
         return 1
+
+
+def pk_dump(filename, obj):
+    with open(filename, 'wb') as f:
+        pickle.dump(obj, f)
+
+
+def pk_load(filename):
+    return pickle.load(open(filename, 'rb'))

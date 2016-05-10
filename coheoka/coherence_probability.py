@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 '''
 Coherence probability based on entity grid
+Reference: Lapata, M., & Barzilay, R. (2005, July).
+    Automatic evaluation of text coherence: Models and representations.
+    In IJCAI (Vol. 5, pp. 1085-1090).
 '''
 from __future__ import print_function, division
 from math import log
@@ -8,7 +11,6 @@ from math import log
 import numpy as np
 
 from entity_grid import EntityGrid
-import utils
 
 
 class CoherenceProbability(object):
@@ -53,7 +55,7 @@ class CoherenceProbability(object):
 class ProbabilityVector(object):
     def __init__(self, corpus):
         self._corpus = corpus
-        self._probs = self._make_probs()
+        self._probs = None
 
     @property
     def corpus(self):
@@ -61,7 +63,10 @@ class ProbabilityVector(object):
 
     @property
     def probs(self):
-        return self._probs
+        if self._probs:
+            return self._probs
+        else:
+            raise ValueError('Please call `make_prob` first')
 
     @property
     def mean(self):
@@ -78,9 +83,9 @@ class ProbabilityVector(object):
     def evaluate_coherence(self, text):
         p = CoherenceProbability(text)
         res = p.coherence_prob - self.mean
-        return res
+        return p.coherence_prob, res
 
-    def _make_probs(self):
+    def make_probs(self):
         res = []
         for text in self.corpus:
             try:
@@ -88,7 +93,8 @@ class ProbabilityVector(object):
                 res.append(p)
             except:
                 print(text)
-        return res
+        self._probs = res
+        return self
 
 
 if __name__ == '__main__':
@@ -112,16 +118,15 @@ if __name__ == '__main__':
     #pprint(e._eg.grid)
     pprint(e.coherence_prob)
 
-    from pprint import pprint
-    print(CoherenceProbability(T)._coherence_prob())
-    print([('', CoherenceProbability(t)._coherence_prob())
-           for t in utils.add_sents(T, 5, T5)])
-    print([('', CoherenceProbability(t)._coherence_prob())
-           for t in utils.remove_sents(T, 5)])
-    print([('', CoherenceProbability(t)._coherence_prob())
-           for t in utils.shuffle_sents(T, 5)])
-    ct = [T1, T2, T3, T4, T5]
-    pv = ProbabilityVector(ct)
-    print(pv.probs, pv.mean, pv.std)
-    print(pv.evaluate_coherence(
-        'I like apple juice. You should hear my advice. Computers are an exelent way to comunicate.'))
+    #    from pprint import pprint
+    #    print(CoherenceProbability(T)._coherence_prob())
+    #    print([('', CoherenceProbability(t)._coherence_prob())
+    #           for t in utils.add_sents(T, 5, T5)])
+    #    print([('', CoherenceProbability(t)._coherence_prob())
+    #           for t in utils.remove_sents(T, 5)])
+    #    print([('', CoherenceProbability(t)._coherence_prob())
+    #           for t in utils.shuffle_sents(T, 5)])
+    #ct = [T1, T2, T3, T4, T5]
+    #pv = ProbabilityVector(c).make_probs()
+    #print(pv.mean, pv.std)
+    #print(pv.evaluate_coherence(T1 + T2))

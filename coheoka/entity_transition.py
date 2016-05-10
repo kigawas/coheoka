@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 '''
 Entity transition based on entity grid
+Reference: Barzilay, R., & Lapata, M. (2008).
+    Modeling local coherence: An entity-based approach.
+    Computational Linguistics, 34(1), 1-34.
 '''
 from __future__ import print_function, division
 import doctest

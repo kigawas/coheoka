@@ -6,10 +6,10 @@ Reference: Barzilay, R., & Lapata, M. (2008).
     Computational Linguistics, 34(1), 1-34.
 '''
 from __future__ import print_function, division
-
 from collections import defaultdict
 import doctest
 from pprint import pprint
+
 import pandas as pd
 
 from corenlp import StanfordCoreNLP

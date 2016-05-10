@@ -3,12 +3,11 @@
 Evaluator based on transition matrix
 """
 from __future__ import print_function, division
-from nltk import sent_tokenize
 
+from nltk import sent_tokenize
 from sklearn import cross_validation, svm
-from pprint import pprint
-import numpy as np
 from scipy.stats import kendalltau as tau
+import numpy as np
 
 from entity_transition import TransitionMatrix
 from ranking import transform_pairwise
@@ -137,28 +136,23 @@ class Evaluator(object):
 
 
 def test(*text):
-    global e
     e = Evaluator(text).make_data_and_clf()
-    pprint([e.evaluate_accuracy() for i in range(5)])
-    pprint([e.evaluate_tau()[0] for i in range(5)])
-    #text = '''A railfan is a person who likes railways and trains.  You should hear my advice. Computers are an exelent way to comunicate.'''
-    #text = 'The Justice Department is conducting an '
-    t = 'My friend is Bob. He loves playing basketball. And he also is good at tennis.'
+    print([e.evaluate_accuracy() for i in range(5)])
+    print([e.evaluate_tau()[0] for i in range(5)])
+    t = 'My friend is Bob. He loves playing basketball. And he also is good at tennis.'  # NOQA
     e.fit()
     print(e.evaluate_coherence(t))
 
 
 if __name__ == '__main__':
-
     T1 = 'My friend is Bob. He loves playing basketball. And he also is good at tennis.'
 
     T2 = 'I have a friend called Bob. He loves playing basketball. I also love playing basketball. We play basketball together sometimes.'
     T3 = 'I like apple juice. He also likes it. And he almost drinks apple juice every day.'
-    T4 = '''An invention is a new thing that someone has made. The computer was an invention when it was first made. We say when it was "invented". New things that are made or created are called inventions. The car is an invention that everyone knows.
-Ideas are also called inventions. Writers can invent characters, and then invent a story about them. Inventions are made by inventors.
+    T4 = '''An invention is a new thing.  I like apple juice.Writers can invent characters, and then invent a story about them. Inventions are made by inventors.
 Inventing.'''
 
-    T1 = '''
+    T5 = '''
         The Justice Department is conducting an anti-trust trial against Microsoft Corp with evidence that the company is increasingly attempting to crush competitors.
         Microsoft is accused of trying to forcefully buy into markets where its own products are not competitive enough to unseat established brands.
         The case revolves around evidence of Microsoft aggressively pressuring Netscape into merging browser software.
@@ -167,7 +161,7 @@ Inventing.'''
         Microsoft continues to show increased earnings despite the trial.
         '''
 
-    T2 = '''
+    T6 = '''
         Meier was born in Amberg. Before "GNTM" she studied mathematics.
         While shopping at a mall, she was invited by a model scout to a casting for "GNTM". Out of 16,421 girls in the casting, she was chosen among 14 other girls to be on the TV show.
         During the show she won a role alongside Heidi Klum in a TV commercial for McDonald's.
@@ -175,10 +169,5 @@ Inventing.'''
         After "Germany's Next Topmodel" Meier was in many magazines around the world such as "Vogue" (Taiwan), "Madame Figaro" (Russia) and "L'Officiel" (France) and worked for many brands such as "Pantene".
         In her private life, Meier is in a steady relationship since 2003.'''
 
-    test(*[T1, T2, T3, T4])
-    # e = Evaluator(w20)
-    # e = Evaluator(w20, shuffle_label_func=tau_score_of_sentents)
-    # e.make_data_and_clf()
-    #    pprint(e.evaluate_accuracy())
-    #    pprint(e.evaluate_accuracy())
-    #    pprint(e.evaluate_accuracy())
+    test(*[T1, T2, T3, T4,T5,T6])
+ 
