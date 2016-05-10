@@ -8,6 +8,7 @@ Reference: Barzilay, R., & Lapata, M. (2008).
 from __future__ import print_function, division
 import doctest
 from itertools import product
+from pprint import pprint
 
 import pandas as pd
 
@@ -163,7 +164,6 @@ class TransitionMatrix(object):
 def test_et(text, n=2):
     pprint(text)
     eg = EntityGrid(text)
-    global et
     et = EntityTransition(eg, n)
 
     pprint(et.transition_table)
@@ -173,27 +173,7 @@ def test_et(text, n=2):
 def test_tm(*test, **kw):
     tm = TransitionMatrix(test, kw['n'])
     pprint(tm.tran_matrix)
-    global df
-    df = tm.tran_matrix
 
 
 if __name__ == '__main__':
     doctest.testmod()
-    T1 = '''
-            The Justice Department is conducting an anti-trust trial against Microsoft Corp with evidence that the company is increasingly attempting to crush competitors.
-            Microsoft is accused of trying to forcefully buy into markets where its own products are not competitive enough to unseat established brands.
-            The case revolves around evidence of Microsoft aggressively pressuring Netscape into merging browser software.
-            Microsoft claims its tactics are commonplace and good economically.
-            The government may file a civil suit ruling that conspiracy to curb competition through collusion is a violation of the Sherman Act.
-            Microsoft continues to show increased earnings despite the trial.
-            '''
-
-    #    T1 = 'My friend is Bob. He loves playing basketball. And he also is good at tennis.'
-
-    T2 = 'I have a friend called Bob. He loves playing basketball. I also love playing basketball. We play basketball together sometimes.'
-    T3 = 'I like apple juice. He also likes it.'
-    T4 = 'The Justice Department is conducting an anti-trust trial against\
-              Microsoft Corp with evidence that the company is increasingly attempting to crush competitors.'
-
-    test_et(T1)
-    test_tm(T1, n=2)

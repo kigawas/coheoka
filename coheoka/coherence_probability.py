@@ -9,6 +9,7 @@ from __future__ import print_function, division
 from math import log
 
 import numpy as np
+from nltk import sent_tokenize
 
 from entity_grid import EntityGrid
 
@@ -81,6 +82,8 @@ class ProbabilityVector(object):
         return np.var(self.probs)
 
     def evaluate_coherence(self, text):
+        if len(sent_tokenize(text)) == 1:
+            return 'Only one sentence.'
         p = CoherenceProbability(text)
         res = p.coherence_prob - self.mean
         return p.coherence_prob, res
@@ -98,35 +101,7 @@ class ProbabilityVector(object):
 
 
 if __name__ == '__main__':
-    from pprint import pprint
-    T1 = '''
-        The Justice Department is conducting an anti-trust trial against Microsoft Corp with evidence that the company is increasingly attempting to crush competitors.
-        Microsoft is accused of trying to forcefully buy into markets where its own products are not competitive enough to unseat established brands.
-        The case revolves around evidence of Microsoft aggressively pressuring Netscape into merging browser software.
-        Microsoft claims its tactics are commonplace and good economically.
-        The government may file a civil suit ruling that conspiracy to curb competition through collusion is a violation of the Sherman Act.
-        Microsoft continues to show increased earnings despite the trial.
-        '''
+    T = 'I have a friend called Bob. He loves playing basketball. I also love playing basketball. We play basketball together sometimes.'  # NOQA
 
-    T2 = 'I have a friend called Bob. He loves playing basketball. I also love playing basketball. We play basketball together sometimes.'
-    T3 = 'I like apple juice. He also likes it. He also likes playing basketball.'
-    T4 = '''A bank gets money from lenders, and pays interest. The bank then lends this money to borrowers. Banks allow borrowers and lenders of different sizes to meet.'''
-    T5 = 'You should heed my advice, people should be using computers. Computers are an exelent way to comunicate.'
-
-    T = T2
     e = CoherenceProbability(T)
-    #pprint(e._eg.grid)
-    pprint(e.coherence_prob)
-
-    #    from pprint import pprint
-    #    print(CoherenceProbability(T)._coherence_prob())
-    #    print([('', CoherenceProbability(t)._coherence_prob())
-    #           for t in utils.add_sents(T, 5, T5)])
-    #    print([('', CoherenceProbability(t)._coherence_prob())
-    #           for t in utils.remove_sents(T, 5)])
-    #    print([('', CoherenceProbability(t)._coherence_prob())
-    #           for t in utils.shuffle_sents(T, 5)])
-    #ct = [T1, T2, T3, T4, T5]
-    #pv = ProbabilityVector(c).make_probs()
-    #print(pv.mean, pv.std)
-    #print(pv.evaluate_coherence(T1 + T2))
+    print(e.coherence_prob)

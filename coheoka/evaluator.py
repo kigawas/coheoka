@@ -145,29 +145,9 @@ def test(*text):
 
 
 if __name__ == '__main__':
-    T1 = 'My friend is Bob. He loves playing basketball. And he also is good at tennis.'
+    T1 = 'My friend is Bob. He loves playing basketball. And he also is good at tennis.'  # NOQA
 
-    T2 = 'I have a friend called Bob. He loves playing basketball. I also love playing basketball. We play basketball together sometimes.'
-    T3 = 'I like apple juice. He also likes it. And he almost drinks apple juice every day.'
-    T4 = '''An invention is a new thing.  I like apple juice.Writers can invent characters, and then invent a story about them. Inventions are made by inventors.
-Inventing.'''
+    T2 = 'I have a friend called Bob. He loves playing basketball. I also love playing basketball. We play basketball together sometimes.'  # NOQA
+    T3 = 'I like apple juice. He also likes it. And he almost drinks apple juice every day.'  # NOQA
 
-    T5 = '''
-        The Justice Department is conducting an anti-trust trial against Microsoft Corp with evidence that the company is increasingly attempting to crush competitors.
-        Microsoft is accused of trying to forcefully buy into markets where its own products are not competitive enough to unseat established brands.
-        The case revolves around evidence of Microsoft aggressively pressuring Netscape into merging browser software.
-        Microsoft claims its tactics are commonplace and good economically.
-        The government may file a civil suit ruling that conspiracy to curb competition through collusion is a violation of the Sherman Act.
-        Microsoft continues to show increased earnings despite the trial.
-        '''
-
-    T6 = '''
-        Meier was born in Amberg. Before "GNTM" she studied mathematics.
-        While shopping at a mall, she was invited by a model scout to a casting for "GNTM". Out of 16,421 girls in the casting, she was chosen among 14 other girls to be on the TV show.
-        During the show she won a role alongside Heidi Klum in a TV commercial for McDonald's.
-        In the last episode (the finale), she won the show and became "Germany's Next Topmodel".
-        After "Germany's Next Topmodel" Meier was in many magazines around the world such as "Vogue" (Taiwan), "Madame Figaro" (Russia) and "L'Officiel" (France) and worked for many brands such as "Pantene".
-        In her private life, Meier is in a steady relationship since 2003.'''
-
-    test(*[T1, T2, T3, T4,T5,T6])
- 
+    test(*[T1, T2, T3])
