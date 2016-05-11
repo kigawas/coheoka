@@ -66,7 +66,7 @@ class ProbabilityVector(object):
         if self._probs:
             return self._probs
         else:
-            raise ValueError('Please call `make_prob` first')
+            raise ValueError('Please call `make_probs` first')
 
     @property
     def mean(self):
