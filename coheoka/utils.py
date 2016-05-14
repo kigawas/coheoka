@@ -19,6 +19,18 @@ def shuffle_sents(text, times):
     return res
 
 
+def replace_sents(text, times):
+    sents = sent_tokenize(text)
+    shuffle(sents)
+    sents[0] = sents[0][::-1]
+    sents[-1] = sents[-1][::-1]
+    res = []
+    for i in range(times):
+        shuffle(sents)
+        res.append(' '.join(sents[:-1]))
+    return res
+
+
 def remove_sents(text, times, remove_number=1):
     sents = sent_tokenize(text)
     res = []
