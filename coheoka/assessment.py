@@ -75,5 +75,5 @@ if __name__ == '__main__':
     pv = pk_load(os.path.join('pickles', 'pv.pkl'))
     ev = pk_load(os.path.join('pickles', 'ev.pkl'))
     test = ['I love you. Test.', 'This a sentence. It is no coherent.']
-    assess = Assessment(test[:20], pv, ev)
+    assess = Assessment(test, pv, ev)
     print(assess.assess_all())
