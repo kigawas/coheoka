@@ -57,13 +57,17 @@ class Assessment(object):
 
     def assess_all(self):
         ev_right, pv_right, length = 0, 0, len(self.corpus)
+        cnt = 0
         for text, label in self.corpus:
             ev_res, pv_res = None, None
+            cnt += 1
             try:
                 ev_res = self.assess_ev(text)
                 pv_res = self.assess_pv(text)
             except Exception:
                 print(text)
+            else:
+                print('{}/{}'.format(cnt, length))
             if ev_res == label:
                 ev_right += 1
             if pv_res == label:
@@ -76,5 +80,5 @@ if __name__ == '__main__':
     pv = pk_load(os.path.join(cur_dir, 'pickles', 'pv.pkl'))
     ev = pk_load(os.path.join(cur_dir, 'pickles', 'ev.pkl'))
     test = ['I love you. Test.', 'This a sentence. It is no coherent.']
-    assess = Assessment(test, pv, ev)
+    assess = Assessment(testtxt, pv, ev)
     print(assess.assess_all())

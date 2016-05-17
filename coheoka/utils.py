@@ -5,6 +5,7 @@ Preprocessing utilities
 
 from random import shuffle, sample
 import cPickle as pickle
+import re
 
 from nltk import sent_tokenize
 from scipy.stats import kendalltau as tau
@@ -19,15 +20,22 @@ def shuffle_sents(text, times):
     return res
 
 
+def shuffle_words(sent):
+    words = filter(lambda x: len(x) > 0, re.split(r'\.|\?|\!|\s', sent))
+    shuffle(words)
+    return ' '.join(words) + '.'
+
+
 def replace_sents(text, times):
     sents = sent_tokenize(text)
     shuffle(sents)
-    sents[0] = sents[0][::-1]
-    sents[-1] = sents[-1][::-1]
+    sents[0] = shuffle_words(sents[0])
+    sents[-1] = shuffle_words(sents[-1])
     res = []
     for i in range(times):
         shuffle(sents)
-        res.append(' '.join(sents[:-1]))
+        res.append(' '.join(sents))
+
     return res
 
 
