@@ -4,7 +4,7 @@ Python coherence evaluation tool using Stanford's CoreNLP.
 
 This repository is designed for entity-base coherence.
 
-## Install
+## Prerequisite
 
 You must run a CoreNLP server on your own if you want to run any module in this repository.
 
@@ -18,11 +18,27 @@ Then you can find a demo at [`localhost:9000`](http://localhost:9000/), which vi
 
 Also, there is an online demo maintained by Stanford at [here](http://corenlp.run/).
 
-Then it is necessary to use a CoreNLP's Python wrapper if you want to communicate with the server, or you can write a wrapper by yourself after reading CoreNLP's documentation. Also, if you are using Windows, make sure you have installed any Python's scientific distribution such as [Anaconda](https://www.continuum.io/downloads) which I strongly recommend. Trust me, you will love it.
+If you need to annotate lots of documents, you **must** run a local server on your own. Otherwise you may want to set an environment variable `CORENLP_URL` to use other's server (e.g. `http://corenlp.run/` and don't forget the `http`).
 
-This repository does **not** need to install a Python wrapper. The requirements are nltk, numpy, pandas, requests, scipy and scikit-learn.
+Also, if you are using Windows, make sure you have installed any Python's scientific distribution such as [Anaconda](https://www.continuum.io/downloads) (If you want many scientific packages) or [Miniconda](http://conda.pydata.org/miniconda.html) (If you don't want to use too much disk space) which I strongly recommend.
 
-## Refrence
+## Install
+
+The requirements are `nltk`, `numpy`, `pandas`, `requests`, `scipy` and `scikit-learn`.
+
+If you have installed Anaconda or Miniconda just
+```
+conda create -n coheoka --file requirements.txt
+activate coheoka  # Windows
+```
+or
+```
+source activate coheoka  # Linux
+```
+
+Check out [conda documentation](http://conda.pydata.org/docs/using/envs.html#create-an-environment) for more details.
+
+## Reference
 1. Barzilay, R., & Lapata, M. (2008).
     Modeling local coherence: An entity-based approach.
     Computational Linguistics, 34(1), 1-34.
@@ -36,3 +52,7 @@ This repository does **not** need to install a Python wrapper. The requirements 
 ### What is the meaning of coheoka?
 
 Coherence + Hyouka (means "evaluation" in Japanese. Kanji: 評価).
+
+### Why it is so slow to download packages using conda?
+
+Try using a mirror maintained by [TUNA](https://mirrors.tuna.tsinghua.edu.cn/help/anaconda/).
