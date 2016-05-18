@@ -79,6 +79,7 @@ if __name__ == '__main__':
     cur_dir = os.path.abspath(os.path.dirname(__file__))
     pv = pk_load(os.path.join(cur_dir, 'pickles', 'pv.pkl'))
     ev = pk_load(os.path.join(cur_dir, 'pickles', 'ev.pkl'))
-    test = ['I love you. Test.', 'This a sentence. It is no coherent.']
-    assess = Assessment(testtxt, pv, ev)
-    print(assess.assess_all())
+    with open(os.path.join(cur_dir, 'corpus', 'test.txt')) as f:
+        testtxt = f.read().split('////')
+        assess = Assessment(testtxt[:2], pv, ev)
+        print(assess.assess_all())
