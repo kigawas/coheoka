@@ -18,9 +18,9 @@ Then you can find a demo at [`localhost:9000`](http://localhost:9000/), which vi
 
 Also, there is an online demo maintained by Stanford at [here](http://corenlp.run/).
 
-If you need to annotate lots of documents, you **must** run a local server on your own. Otherwise you may want to set an environment variable `CORENLP_URL` to use other's server (e.g. `http://corenlp.run/` and don't forget the `http`).
+If you need to annotate lots of documents, you **must** run a local server on your own. Or if you just want to test a few documents without downloading the CoreNLP tool, you may set an environment variable `CORENLP_URL` to use an existing server (e.g. `http://corenlp.run/` and don't forget the **`http`**).
 
-Also, if you are using Windows (actually, it is recommended to install pre-built binaries instead of building them by yourself whatever OS you use), make sure you have installed any Python's scientific distribution such as [Anaconda](https://www.continuum.io/downloads) (If you want many scientific packages) or [Miniconda](http://conda.pydata.org/miniconda.html) (If you don't want to use too much disk space) which I strongly recommend.
+Also, if you are using Windows (actually, it is recommended to install pre-built binaries instead of building them by yourself whatever OS you choose), make sure you have installed any Python's scientific distribution such as [Anaconda](https://www.continuum.io/downloads) (if you want many scientific packages for future use) or [Miniconda](http://conda.pydata.org/miniconda.html) (if you don't want to spend too much disk space) which I strongly recommend.
 
 ## Install
 
