@@ -20,7 +20,7 @@ Also, there is an online demo maintained by Stanford at [here](http://corenlp.ru
 
 If you need to annotate lots of documents, you **must** run a local server on your own. Otherwise you may want to set an environment variable `CORENLP_URL` to use other's server (e.g. `http://corenlp.run/` and don't forget the `http`).
 
-Also, if you are using Windows, make sure you have installed any Python's scientific distribution such as [Anaconda](https://www.continuum.io/downloads) (If you want many scientific packages) or [Miniconda](http://conda.pydata.org/miniconda.html) (If you don't want to use too much disk space) which I strongly recommend.
+Also, if you are using Windows (actually, it is recommended to install pre-built binaries instead of building them by yourself whatever OS you use), make sure you have installed any Python's scientific distribution such as [Anaconda](https://www.continuum.io/downloads) (If you want many scientific packages) or [Miniconda](http://conda.pydata.org/miniconda.html) (If you don't want to use too much disk space) which I strongly recommend.
 
 ## Install
 
