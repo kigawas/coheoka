@@ -8,7 +8,7 @@ This repository is designed for entity-base coherence.
 
 It is highly recommended to run a CoreNLP server on your own if you want to test coherence in this repository.
 
-You can download Stanford CoreNLP latest version (3.6.0) at [here](http://stanfordnlp.github.io/CoreNLP/download.html) and run a local server (requiring Java 1.8+) by this way:
+You can download Stanford CoreNLP latest version (3.9.2) at [here](http://stanfordnlp.github.io/CoreNLP/download.html) and run a local server (requiring Java 1.8+) by this way:
 
 ```
 java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer
