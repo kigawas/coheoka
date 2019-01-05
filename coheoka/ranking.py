@@ -141,14 +141,14 @@ if __name__ == '__main__':
 
     # print the performance of ranking
     rank_svm = RankSVM().fit(X[train], Y[train])
-    print 'Performance of ranking ', rank_svm.score(X[test], Y[test])
+    print('Performance of ranking ', rank_svm.score(X[test], Y[test]))
     X_test_trans, y_test_trans = transform_pairwise(X[test], y[test])
-    print 'Kendall\'s tau ', tau(
-        rank_svm.decision_function(X_test_trans), y_test_trans)[0]
+    print('Kendall\'s tau ', tau(
+        rank_svm.decision_function(X_test_trans), y_test_trans)[0])
 
     # and that of linear regression
     ridge = linear_model.RidgeCV(fit_intercept=True)
     ridge.fit(X[train], y[train])
 
     score = np.mean(np.sign(np.dot(X_test_trans, ridge.coef_)) == y_test_trans)
-    print 'Performance of linear regression ', score
+    print('Performance of linear regression ', score)

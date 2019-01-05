@@ -7,6 +7,7 @@ Reference: Barzilay, R., & Lapata, M. (2008).
 '''
 from __future__ import print_function, division
 from collections import defaultdict
+from functools import reduce
 from pprint import pprint
 import doctest
 import os
@@ -89,8 +90,9 @@ class EntityGrid(object):
                               if token not in Constants.REMOVE_ABBR])
         self._data = CoreNLP.annotate(self.text)
         self._sentences = self._data['sentences']
+        # import pdb; pdb.set_trace()
 
-        self._depens = [s['basic-dependencies'] for s in self._sentences]
+        self._depens = [s['basicDependencies'] for s in self._sentences]
         self._entity_tokens = [
             [t for t in s['tokens']
              if t['pos'] in Constants.noun_tags()] for s in self._sentences
