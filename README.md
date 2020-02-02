@@ -2,7 +2,7 @@
 
 Python coherence evaluation tool using Stanford's CoreNLP.
 
-This repository is designed for entity-base coherence.
+This repository is designed for entity-based coherence.
 
 ## Prerequisite
 
@@ -42,13 +42,3 @@ Check out [conda documentation](http://conda.pydata.org/docs/using/envs.html#cre
 2. Lapata, M., & Barzilay, R. (2005, July).
     Automatic evaluation of text coherence: Models and representations.
     In IJCAI (Vol. 5, pp. 1085-1090).
-
-## Trivia
-
-### What is the meaning of coheoka?
-
-Coherence + Hyouka (means "evaluation" in Japanese. Kanji: 評価).
-
-### Why so slow to download packages from conda?
-
-Try using a mirror maintained by [TUNA](https://mirrors.tuna.tsinghua.edu.cn/help/anaconda/).
